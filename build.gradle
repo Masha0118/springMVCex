@@ -1,18 +1,13 @@
 plugins {
 	id 'java'
-	id 'war'
 	id 'org.springframework.boot' version '2.4.3'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
 
 group = 'hello'
 version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
 
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
-}
 
 configurations {
 	compileOnly {
@@ -28,16 +23,28 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok:1.18.26'
 	annotationProcessor 'org.projectlombok:lombok:1.18.26'
-	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+tasks.withType(JavaCompile).configureEach {
+	// 컴파일 시 인코딩을 UTF-8로 설정합니다.
+	options.encoding = 'UTF-8'
+}
+
+tasks.withType(Test).configureEach {
+	// 테스트 실행 시점에 --add-opens 옵션을 추가합니다.
+	jvmArgs += ['--add-opens', 'jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED']
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
+	testLogging {
+		events "passed", "skipped", "failed"
+	}
 }
-tasks.withType(JavaCompile).configureEach {
-	options.compilerArgs += [
-			'--add-opens', 'jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED'
-	]
+
+
+test {
+	useJUnitPlatform()
 }
